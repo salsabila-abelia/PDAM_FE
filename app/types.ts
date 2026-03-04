@@ -20,6 +20,7 @@ export interface Admin {
 }
 
 export interface Customer {
+  username: ReactNode;
   id: number
   user_id: number
   customer_number: string
@@ -31,4 +32,15 @@ export interface Customer {
   createdAt: string
   updatedAt: string
   user: User
+}
+
+export interface Services {
+  id: number
+  name: string
+  min_usage: number
+  max_usage: number
+  price: number
+  owner_token: string
+  createdAt: string
+  updatedAt: string
 }

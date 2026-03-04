@@ -4,7 +4,7 @@ export const storeCookie = (key: string, plainText: string, expired: number ) =>
   Cookies.set(key, plainText, { expires: expired});
 };
 
-export const setCookie = (key: string) => {
+export const getCookie = (key: string) => {
   Cookies.get(key);
 };
 
