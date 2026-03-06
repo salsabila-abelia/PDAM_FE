@@ -1,0 +1,147 @@
+"use client"
+
+import { FormEvent, useState } from "react"
+import { useRouter } from "next/navigation"
+import { getCookie } from "@/lib/client-cookies"
+
+import { Button } from "@/components/ui/button"
+import {
+  Dialog,
+  DialogTrigger,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+  DialogClose,
+} from "@/components/ui/dialog"
+
+import { Label } from "@/components/ui/label"
+import { Input } from "@/components/ui/input"
+
+import { Customer } from "@/app/types"
+
+function ResetPassword({ selectedData }: { selectedData: Customer }) {
+
+  const router = useRouter()
+  const [open, setOpen] = useState(false)
+  const [password, setPassword] = useState("")
+  const [loading, setLoading] = useState(false)
+
+  const openModal = () => {
+    setOpen(true)
+    setPassword("")
+  }
+
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    setLoading(true)
+
+    try {
+
+      const token = getCookie("accessToken")
+
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_BASE_API_URL}/customers/${selectedData.id}`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            "APP-KEY": process.env.NEXT_PUBLIC_APP_KEY || "",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            password: password,
+          }),
+        }
+      )
+
+      const result = await response.json()
+
+      if (response.ok && result?.success) {
+
+        alert("Password berhasil diubah!")
+
+        setOpen(false)
+        setPassword("")
+        router.refresh()
+
+      } 
+      
+      else if (
+        result?.message?.toLowerCase().includes("same") ||
+        result?.message?.toLowerCase().includes("sama")
+      ) {
+
+        alert("Password baru tidak boleh sama dengan password sebelumnya")
+
+      } 
+      
+      else {
+
+        alert(`Gagal reset password: ${result?.message || "Terjadi kesalahan"}`)
+
+      }
+
+    } catch (error) {
+
+      console.error(error)
+      alert("Terjadi kesalahan saat koneksi ke server")
+
+    } finally {
+
+      setLoading(false)
+
+    }
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button variant="outline" onClick={openModal}>
+          Resetpw
+        </Button>
+      </DialogTrigger>
+
+      <DialogContent className="sm:max-w-sm">
+        <form onSubmit={handleSubmit}>
+
+          <DialogHeader>
+            <DialogTitle>Reset Password</DialogTitle>
+            <DialogDescription>
+              Reset password untuk customer <b>{selectedData.name}</b>
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 py-4">
+            <div>
+              <Label htmlFor="password">Password Baru</Label>
+              <Input
+                id="password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+              />
+            </div>
+          </div>
+
+          <DialogFooter className="gap-2">
+            <DialogClose asChild>
+              <Button variant="outline" type="button" disabled={loading}>
+                Cancel
+              </Button>
+            </DialogClose>
+
+            <Button type="submit" disabled={loading}>
+              {loading ? "Saving..." : "Save"}
+            </Button>
+          </DialogFooter>
+
+        </form>
+      </DialogContent>
+    </Dialog>
+  )
+}
+
+export default ResetPassword

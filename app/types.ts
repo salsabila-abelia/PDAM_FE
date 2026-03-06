@@ -20,27 +20,41 @@ export interface Admin {
 }
 
 export interface Customer {
-  username: ReactNode;
-  id: number
-  user_id: number
-  customer_number: string
-  name: string
-  phone: string
-  address: string
-  service_id: number
-  owner_token: string
-  createdAt: string
-  updatedAt: string
-  user: User
+  id: number;
+  username: string;
+  user: User;
+  password: string;
+  name: string;
+  phone: string;
+  address: string;
+  customer_number: string;
+  tanggal_pendaftaran: string;
+  role: string;
+  owner_token: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface Data {
+  id: number;
+  user_id: number;
+  username: string;
+  name: string;
+  phone: string;
+  address: string;
+  customer_number: string;
+  owner_token: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface Services {
-  id: number
-  name: string
-  min_usage: number
-  max_usage: number
-  price: number
-  owner_token: string
-  createdAt: string
-  updatedAt: string
+  id: number;
+  name: string;
+  min_usage: number;
+  max_usage: number;
+  price: number;
+  owner_token: string;
+  createdAt: string;
+  updatedAt: string;
 }

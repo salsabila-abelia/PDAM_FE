@@ -1,148 +1,189 @@
 import { Services } from "@/app/types";
-import { Button } from "@/components/ui/button";
 import { getCookies } from "@/lib/server-cookie";
 import AddService from "./add";
-import { Package, Tag, Clock, ChevronRight } from "lucide-react"; // Import ikon
+import DeleteService from "./delete";
+import EditService from "./edit";
 import Search from "@/components/Search";
+import Pagination from "@/components/pagination";
 
 type ResultData = {
-    success: boolean,
-    data: Services[],
-    message: string,
-    count: number,
-}
+  success: boolean;
+  data: Services[];
+  message: string;
+  count: number;
+};
 
-async function getServices(page: number, quantity: number, search: string): Promise<ResultData> {
-    try {
-        const token = await getCookies('accessToken');
-        const url = `${process.env.NEXT_PUBLIC_BASE_API_URL}/services?page=${page}&quantity=${quantity}&search=${search}`;
+async function getServices(
+  page: number,
+  quantity: number,
+  search: string
+): Promise<ResultData> {
+  try {
+    const token = await getCookies("accessToken");
 
-        const response = await fetch(url, {
-            method: "GET",
-            headers: {
-                "APP-KEY": process.env.NEXT_PUBLIC_APP_KEY || "",
-                "Authorization": `Bearer ${token}`,
-            },
-            cache: "no-store",
-        });
+    const url = `${process.env.NEXT_PUBLIC_BASE_API_URL}/services?page=${page}&quantity=${quantity}&search=${search}`;
 
-        const responseData: ResultData = await response.json();
+    const response = await fetch(url, {
+      method: "GET",
+      headers: {
+        "APP-KEY": process.env.NEXT_PUBLIC_APP_KEY || "",
+        Authorization: `Bearer ${token}`,
+      },
+      cache: "no-store",
+    });
 
-        if (!response.ok) {
-            console.log(responseData.message);
-            return {
-                success: responseData.success,
-                message: responseData.message,
-                data: [],
-                count: 0,
-            };
-        }
-        return {
-            success: responseData.success,
-            message: responseData.message,
-            data: responseData.data,
-            count: responseData.count,
-        };
-    } catch (error) {
-        console.log(error);
-        return {
-            success: false,
-            message: "failed to fetch services",
-            data: [],
-            count: 0,
-        };
+    const responseData: ResultData = await response.json();
+
+    if (!response.ok) {
+      return {
+        success: false,
+        data: [],
+        message: responseData.message,
+        count: 0,
+      };
     }
+
+    return responseData;
+  } catch (error) {
+    console.log(error);
+
+    return {
+      success: false,
+      data: [],
+      message: "Failed to fetch services",
+      count: 0,
+    };
+  }
 }
 
 type Props = {
-    searchParams: Promise<{
-        page?: number,
-        quantity?: number,
-        search?: string,
-    }>
-}
+  searchParams: Promise<{
+    page?: number;
+    quantity?: number;
+    search?: string;
+  }>;
+};
 
 export default async function ServicesPage(prop: Props) {
-    const page = (await prop.searchParams)?.page || 1
-    const quantity = (await prop.searchParams)?.quantity || 5
-    const search = (await prop.searchParams)?.search || ""
-    const {count: counts, data: services} = await getServices(page, quantity, search)
+  const page = (await prop.searchParams).page || 1;
+  const quantity = (await prop.searchParams).quantity || 5;
+  const search = (await prop.searchParams).search || "";
 
-    return (
-        <div className="p-6 lg:p-10 max-w-7xl mx-auto">
-            {/* Header Section */}
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-10">
-                <div>
-                    <h1 className="text-3xl font-bold tracking-tight text-slate-900">Daftar Layanan</h1>
-                    <p className="text-slate-500 mt-1">Kelola semua layanan jasa Anda di sini.</p>
-                </div>
-            </div>
+  const { count: counts, data: services } = await getServices(
+    page,
+    quantity,
+    search
+  );
 
-            <div className="flex justify-between items-center m-4">
-                {/* Search Bar */}
-                <div className="flex items-center w-full max-w-md grow">
-                    <Search search={search ?? ``}/>
-                </div>
+  return (
+    <div className="w-full min-h-screen bg-gradient-to-br from-pink-100 via-purple-100 to-blue-100 p-8">
 
-                {/* Add Button */}
-                <div className="ml-4">
-                    <AddService />
-                </div>
-            </div>
+      {/* HEADER */}
+      <div className="mb-8">
 
-            {/* Content Section */}
-            {services.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-20 bg-slate-50 rounded-xl border-2 border-dashed border-slate-200">
-                    <Package className="w-12 h-12 text-slate-300 mb-4" />
-                    <p className="text-slate-500 font-medium">Data service tidak ditemukan</p>
-                </div>
-            ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {services.map((service) => (
-                        <div
-                            key={service.id}
-                            className="group bg-white rounded-xl border border-slate-200 p-6 shadow-sm hover:shadow-md transition-all hover:-translate-y-1"
-                        >
-                            <div className="flex justify-between items-start mb-4">
-                                <div className="p-2 bg-blue-50 text-blue-600 rounded-lg group-hover:bg-blue-600 group-hover:text-white transition-colors">
-                                    <Tag size={20} />
-                                </div>
-                                <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
-                                    Service ID: #{service.id.toString().slice(-4)}
-                                </span>
-                            </div>
+        <h1 className="text-3xl font-bold bg-gradient-to-r from-pink-500 via-purple-500 to-blue-500 text-transparent bg-clip-text">
+          Services Management
+        </h1>
 
-                            <h2 className="text-xl font-semibold text-slate-800 mb-2 capitalize">
-                                {service.name}
-                            </h2>
+        <p className="text-gray-600 text-sm mt-1">
+          Manage water service packages
+        </p>
 
-                            <div className="space-y-3">
-                                <div className="flex items-center text-slate-600">
-                                    <span className="text-2xl font-bold text-blue-600">
-                                        Rp {Number(service.price).toLocaleString('id-ID')}
-                                    </span>
-                                </div>
+      </div>
 
-                                <hr className="border-slate-100" />
 
-                                <div className="flex items-center gap-2 text-sm text-slate-500">
-                                    <Clock size={16} />
-                                    <span>Durasi Penggunaan:</span>
-                                    <span className="font-medium text-slate-700">
-                                        {service.min_usage} - {service.max_usage} Unit
-                                    </span>
+      {/* SEARCH + ADD BUTTON */}
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
 
-                                </div>
-                            </div>
-
-                            <Button className="w-full mt-6 variant-outline group-hover:bg-slate-900 group-hover:text-white transition-colors">
-                                Detail Layanan
-                                <ChevronRight size={16} className="ml-2" />
-                            </Button>
-                        </div>
-                    ))}
-                </div>
-            )}
+        <div className="w-full md:max-w-md">
+          <Search search={search ?? ""} url="/admin/services" />
         </div>
-    );
+
+        <div className="relative group">
+
+          {/* gradient glow */}
+          <div className="absolute -inset-1 bg-gradient-to-r from-pink-400 via-purple-400 to-blue-400 rounded-xl blur opacity-60 group-hover:opacity-100 transition"></div>
+
+          <div className="relative">
+            <AddService />
+          </div>
+
+        </div>
+
+      </div>
+
+
+      {/* SERVICE CARDS */}
+      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+        {services.length === 0 ? (
+
+          <div className="col-span-full text-center text-gray-500">
+            Data service tidak ada
+          </div>
+
+        ) : (
+
+          services.map((service) => (
+
+            <div
+              key={service.id}
+              className="bg-white/70 backdrop-blur-xl rounded-2xl shadow-xl border border-white/40 p-6 space-y-4 hover:scale-[1.02] transition"
+            >
+
+              {/* TITLE */}
+              <h2 className="text-lg font-semibold text-gray-800">
+                {service.name}
+              </h2>
+
+
+              {/* PRICE */}
+              <p className="text-sm text-gray-600">
+                <span className="font-medium">Harga:</span>{" "}
+                Rp {service.price}
+              </p>
+
+
+              {/* USAGE */}
+              <p className="text-sm text-gray-600">
+                <span className="font-medium">Pemakaian:</span>{" "}
+                {service.min_usage} - {service.max_usage}
+              </p>
+
+
+              {/* ACTION */}
+              <div className="flex gap-2 pt-2">
+
+                <EditService selectedData={service} />
+
+                <DeleteService selectedData={service} />
+
+              </div>
+
+            </div>
+
+          ))
+
+        )}
+
+      </div>
+
+
+      {/* PAGINATION */}
+      <div className="mt-8 flex justify-center">
+
+        <div className="bg-white/70 backdrop-blur-xl border border-white/40 shadow-lg rounded-xl px-6 py-4">
+
+          <Pagination
+            count={counts}
+            perPage={quantity}
+            currentPage={page}
+          />
+
+        </div>
+
+      </div>
+
+    </div>
+  );
 }

@@ -4,14 +4,14 @@ import { Services } from "@/app/types"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import {
-  Dialog,
-  DialogTrigger,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter,
-  DialogClose,
+    Dialog,
+    DialogTrigger,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogDescription,
+    DialogFooter,
+    DialogClose,
 } from "@/components/ui/dialog"
 
 import { Label } from "@/components/ui/label"
@@ -19,171 +19,221 @@ import { useRouter } from "next/navigation"
 import { useState } from "react"
 
 const AddCustomer = ({
-  serviceData,
+    serviceData,
 }: {
-  serviceData: Services[]
+    serviceData: Services[]
 }) => {
-  const router = useRouter()
 
-  const [open, setOpen] = useState(false)
-  const [username, setUsername] = useState("")
-  const [password, setPassword] = useState("")
-  const [customerNumber, setCustomerNumber] = useState("")
-  const [address, setAddress] = useState("")
-  const [serviceId, setServiceId] = useState("")
-  const [name, setName] = useState("")
-  const [phone, setPhone] = useState("")
+    const router = useRouter()
 
-  const openModal = () => {
-    setOpen(true)
-    setUsername("")
-    setPassword("")
-    setCustomerNumber("")
-    setAddress("")
-    setServiceId("")
-    setName("")
-    setPhone("")
-  }
+    const [open, setOpen] = useState(false)
+    const [customerNumber, setCustomerNumber] = useState("")
+    const [address, setAddress] = useState("")
+    const [serviceId, setServiceId] = useState(0)
+    const [name, setName] = useState("")
+    const [phone, setPhone] = useState("")
+    const [loading, setLoading] = useState(false)
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
-
-    const payload = {
-      username,
-      password,
-      customer_number: customerNumber,
-      address,
-      service_id: serviceId,
-      name,
-      phone,
+    const openModal = () => {
+        setOpen(true)
+        setCustomerNumber("")
+        setAddress("")
+        setServiceId(0)
+        setName("")
+        setPhone("")
     }
 
-    console.log("Data Customer:", payload)
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault()
+        setLoading(true)
 
-    // TODO: Ganti dengan API endpoint kamu
-    // await fetch("/api/customer", {
-    //   method: "POST",
-    //   headers: { "Content-Type": "application/json" },
-    //   body: JSON.stringify(payload),
-    // })
+        const username = customerNumber
+        const password = customerNumber
 
-    setOpen(false)
-    router.refresh()
-  }
+        const payload = {
+            username,
+            password,
+            customer_number: customerNumber,
+            address,
+            service_id: Number(serviceId),
+            name,
+            phone,
+        }
 
-  return (
-    <div>
-      <Dialog open={open} onOpenChange={setOpen}>
-        <DialogTrigger asChild>
-          <Button onClick={openModal}>Add Data Customer</Button>
-        </DialogTrigger>
+        try {
 
-        <DialogContent className="sm:max-w-sm">
-          <form onSubmit={handleSubmit}>
-            <DialogHeader>
-              <DialogTitle>Add Customer</DialogTitle>
-              <DialogDescription>
-                Isi data customer dengan lengkap lalu klik save.
-              </DialogDescription>
-            </DialogHeader>
+            const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_API_URL}/customers`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "APP-KEY": process.env.NEXT_PUBLIC_APP_KEY || "",
+                },
+                body: JSON.stringify(payload),
+            })
 
-            <div className="space-y-4 py-4">
-              <div>
-                <Label htmlFor="username">Username</Label>
-                <Input
-                  id="username"
-                  type="text"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  required
-                />
-              </div>
+            if (response.ok) {
+                setOpen(false)
+                router.refresh()
+                alert("Berhasil menambah customer!")
+            } else {
+                const errorData = await response.json()
+                alert(`Gagal: ${errorData.message || "Terjadi kesalahan"}`)
+            }
 
-              <div>
-                <Label htmlFor="password">Password</Label>
-                <Input
-                  id="password"
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                />
-              </div>
+        } catch (error) {
+            console.error("Error:", error)
+            alert("Koneksi ke server gagal!")
+        } finally {
+            setLoading(false)
+        }
+    }
 
-              <div>
-                <Label htmlFor="name">Name</Label>
-                <Input
-                  id="name"
-                  type="text"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  required
-                />
-              </div>
+    return (
+        <div>
+            <Dialog open={open} onOpenChange={setOpen}>
 
-              <div>
-                <Label htmlFor="customerNumber">Customer ID</Label>
-                <Input
-                  id="customerNumber"
-                  type="text"
-                  value={customerNumber}
-                  onChange={(e) => setCustomerNumber(e.target.value)}
-                  required
-                />
-              </div>
+                {/* BUTTON ADD CUSTOMER */}
+                <DialogTrigger asChild>
+                    <button
+                        onClick={openModal}
+                        className="
+                        px-5 py-2.5
+                        rounded-lg
+                        text-white
+                        font-semibold
+                        bg-gradient-to-r
+                        from-pink-500
+                        via-purple-500
+                        to-blue-500
+                        hover:opacity-90
+                        transition
+                        shadow-md
+                        "
+                    >
+                        Add Data Customer
+                    </button>
+                </DialogTrigger>
 
-              <div>
-                <Label htmlFor="phone">Phone</Label>
-                <Input
-                  id="phone"
-                  type="text"
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                />
-              </div>
+                <DialogContent className="sm:max-w-sm">
 
-              <div>
-                <Label htmlFor="address">Address</Label>
-                <Input
-                  id="address"
-                  type="text"
-                  value={address}
-                  onChange={(e) => setAddress(e.target.value)}
-                />
-              </div>
+                    <form onSubmit={handleSubmit}>
 
-              <div>
-                <Label htmlFor="service">Service</Label>
-                <select
-                  id="service"
-                  className="w-full border rounded-md p-2"
-                  value={serviceId}
-                  onChange={(e) => setServiceId(e.target.value)}
-                  required
-                >
-                  <option value="">Pilih Service</option>
-                  {serviceData.map((service) => (
-                    <option key={service.id} value={service.id}>
-                      {service.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
+                        <DialogHeader>
+                            <DialogTitle>Add Customer</DialogTitle>
+                            <DialogDescription>
+                                Isi data customer dengan lengkap lalu klik save.
+                            </DialogDescription>
+                        </DialogHeader>
 
-            <DialogFooter>
-              <DialogClose asChild>
-                <Button variant="outline" type="button">
-                  Cancel
-                </Button>
-              </DialogClose>
-              <Button type="submit">Save</Button>
-            </DialogFooter>
-          </form>
-        </DialogContent>
-      </Dialog>
-    </div>
-  )
+                        <div className="space-y-4 py-4 max-h-[60vh] overflow-y-auto px-1">
+
+                            <div>
+                                <Label htmlFor="name">Name</Label>
+                                <Input
+                                    id="name"
+                                    type="text"
+                                    value={name}
+                                    onChange={(e) => setName(e.target.value)}
+                                    required
+                                />
+                            </div>
+
+                            <div>
+                                <Label htmlFor="customerNumber">Customer ID</Label>
+                                <Input
+                                    id="customerNumber"
+                                    type="text"
+                                    value={customerNumber}
+                                    onChange={(e) => setCustomerNumber(e.target.value)}
+                                    required
+                                />
+                            </div>
+
+                            <div>
+                                <Label htmlFor="phone">Phone</Label>
+                                <Input
+                                    id="phone"
+                                    type="text"
+                                    value={phone}
+                                    onChange={(e) => setPhone(e.target.value)}
+                                />
+                            </div>
+
+                            <div>
+                                <Label htmlFor="address">Address</Label>
+                                <Input
+                                    id="address"
+                                    type="text"
+                                    value={address}
+                                    onChange={(e) => setAddress(e.target.value)}
+                                />
+                            </div>
+
+                            <div>
+                                <Label htmlFor="service">Service</Label>
+
+                                <select
+                                    id="service"
+                                    className="w-full border rounded-md p-2 text-sm"
+                                    value={serviceId}
+                                    onChange={(e) => setServiceId(Number(e.target.value))}
+                                    required
+                                >
+                                    <option value="">
+                                        Pilih Service
+                                    </option>
+
+                                    {serviceData.map((service) => (
+                                        <option
+                                            key={service.id}
+                                            value={service.id}
+                                        >
+                                            {service.name}
+                                        </option>
+                                    ))}
+
+                                </select>
+
+                            </div>
+
+                        </div>
+
+                        <DialogFooter className="gap-2">
+
+                            <DialogClose asChild>
+                                <Button
+                                    variant="outline"
+                                    type="button"
+                                    disabled={loading}
+                                >
+                                    Cancel
+                                </Button>
+                            </DialogClose>
+
+                            <Button
+                                type="submit"
+                                disabled={loading}
+                                className="
+                                bg-gradient-to-r
+                                from-pink-500
+                                via-purple-500
+                                to-blue-500
+                                text-white
+                                hover:opacity-90
+                                "
+                            >
+                                {loading ? "Saving..." : "Save"}
+                            </Button>
+
+                        </DialogFooter>
+
+                    </form>
+
+                </DialogContent>
+
+            </Dialog>
+        </div>
+    )
 }
 
 export default AddCustomer

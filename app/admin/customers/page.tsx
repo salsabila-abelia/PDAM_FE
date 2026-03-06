@@ -1,78 +1,209 @@
-import AddCustomer from "./add"
-import { Services, Customer } from "@/app/types"
-import { cookies } from "next/headers"
+import { getCookies } from "@/lib/server-cookie";
+import { Customer, Services } from "@/app/types";
+import AddCustomer from "./add";
+import EditCustomer from "./edit";
+import DeleteCustomer from "./delete";
+import Search from "@/components/Search";
+import Pagination from "@/components/pagination";
+import ResetPassword from "./resetpw";
+
+type ResultData = {
+  success: boolean;
+  message: string;
+  data: Customer[];
+  count: number;
+};
+
+type ServiceData = {
+  success: boolean;
+  message: string;
+  data: Services[];
+  count: number;
+};
+
+async function getCustomers(
+  page: number,
+  quantity: number,
+  search: string,
+): Promise<ResultData> {
+  try {
+    const token = await getCookies("accessToken");
+
+    const url = `${process.env.NEXT_PUBLIC_BASE_API_URL}/customers?page=${page}&quantity=${quantity}&search=${search}`;
+
+    const response = await fetch(url, {
+      method: "GET",
+      headers: {
+        "APP-KEY": process.env.NEXT_PUBLIC_APP_KEY || "",
+        Authorization: `Bearer ${token}`,
+      },
+      cache: "no-store",
+    });
+
+    const responseData: ResultData = await response.json();
+
+    if (!response.ok) {
+      return {
+        success: false,
+        message: responseData.message,
+        data: [],
+        count: 0,
+      };
+    }
+
+    return responseData;
+  } catch (error) {
+    console.error(error);
+
+    return {
+      success: false,
+      message: "Failed to fetch customers",
+      data: [],
+      count: 0,
+    };
+  }
+}
 
 async function getServices(): Promise<Services[]> {
-  const token = (await cookies()).get("token")?.value
+  try {
+    const token = await getCookies("accessToken");
 
-  const response = await fetch(
-    `${process.env.NEXT_PUBLIC_BASE_URL}/api/services`,
-    {
+    const url = `${process.env.NEXT_PUBLIC_BASE_API_URL}/services?quantity=1000`;
+
+    const response = await fetch(url, {
       method: "GET",
       headers: {
+        "APP-KEY": process.env.NEXT_PUBLIC_APP_KEY || "",
         Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
       },
       cache: "no-store",
-    }
-  )
+    });
 
-  if (!response.ok) {
-    throw new Error("Failed to fetch services")
+    const responseData: ServiceData = await response.json();
+
+    if (!response.ok) return [];
+
+    return responseData.data;
+  } catch (error) {
+    console.error(error);
+    return [];
   }
-
-  return response.json()
 }
 
-async function getCustomers(): Promise<Customer[]> {
-  const token = (await cookies()).get("token")?.value
+type Props = {
+  searchParams: Promise<{
+    page?: number;
+    quantity?: number;
+    search?: string;
+  }>;
+};
 
-  const response = await fetch(
-    `${process.env.NEXT_PUBLIC_BASE_URL}/api/customers`,
-    {
-      method: "GET",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-      cache: "no-store",
-    }
-  )
+export default async function CustomersPage(props: Props) {
+  const page = (await props.searchParams)?.page || 1;
+  const quantity = (await props.searchParams)?.quantity || 5;
+  const search = (await props.searchParams)?.search || "";
 
-  if (!response.ok) {
-    throw new Error("Failed to fetch customers")
-  }
+  const { count: counts, data: customers } = await getCustomers(
+    page,
+    quantity,
+    search,
+  );
 
-  return response.json()
-}
-
-export default async function Page() {
-  const services = await getServices()
-  const customers = await getCustomers()
+  const services = await getServices();
 
   return (
-    <div className="p-6 space-y-4">
-      <div className="ml-4">
-        <AddCustomer serviceData={services} />
+    <div className="w-full min-h-screen bg-gradient-to-br from-pink-100 via-purple-100 to-blue-100 p-8">
+      {/* HEADER */}
+      <div className="mb-8">
+        <h1
+          className="text-2xl font-bold 
+          bg-gradient-to-r from-pink-500 via-purple-500 to-blue-500 
+          text-transparent bg-clip-text"
+        >
+          Customer Management
+        </h1>
+
+        <p className="text-gray-600 text-sm">
+          Manage customer data and subscriptions
+        </p>
       </div>
 
-      {/* Contoh render customer */}
-      <div className="mt-6">
-        <h2 className="text-lg font-semibold">Customer List</h2>
+      {/* SEARCH + ADD */}
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+        <div className="w-full md:max-w-md">
+          <Search url="/admin/customer" search={search} />
+        </div>
 
-        <ul className="mt-2 space-y-2">
-          {customers.map((customer) => (
-            <li
-              key={customer.id}
-              className="border p-3 rounded-md"
-            >
-              <p><strong>{customer.name}</strong></p>
-              <p>{customer.username}</p>
-              <p>{customer.phone}</p>
-            </li>
-          ))}
-        </ul>
+        <div className="flex justify-start md:justify-end">
+          <div className="relative group">
+            <div className="absolute -inset-1 rounded-xl bg-gradient-to-r from-pink-400 via-purple-400 to-blue-400 blur opacity-60 transition group-hover:opacity-100"></div>
+
+            <div className="relative">
+              <AddCustomer serviceData={services} />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* TABLE CARD */}
+      <div className="bg-white/70 backdrop-blur-lg rounded-2xl shadow-xl border border-white/40 overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full text-left">
+            {/* HEADER */}
+            <thead className="bg-gradient-to-r from-pink-200 via-purple-200 to-blue-200 text-gray-700 uppercase text-sm tracking-wide">
+              <tr>
+                <th className="px-6 py-4 w-16 font-semibold">No</th>
+                <th className="px-6 py-4 font-semibold">Name</th>
+                <th className="px-6 py-4 font-semibold">Phone</th>
+                <th className="px-6 py-4 font-semibold">Address</th>
+                <th className="px-6 py-4 text-center font-semibold w-48">
+                  Action
+                </th>
+              </tr>
+            </thead>
+
+            {/* BODY */}
+            <tbody>
+              {customers.map((customer, index) => (
+                <tr
+                  key={customer.id}
+                  className="border-t border-white/40 hover:bg-white/60 transition duration-200"
+                >
+                  <td className="px-6 py-4 text-gray-700">
+                    {(page - 1) * quantity + index + 1}
+                  </td>
+
+                  <td className="px-6 py-4 font-semibold text-gray-800">
+                    {customer.name}
+                  </td>
+
+                  <td className="px-6 py-4 text-gray-600">{customer.phone}</td>
+
+                  <td className="px-6 py-4 text-gray-600">
+                    {customer.address}
+                  </td>
+
+                  {/* ACTION */}
+                  <td className="px-6 py-4">
+                    <div className="flex gap-2 justify-center">
+                      <EditCustomer selectedData={customer} />
+                      <DeleteCustomer selectedData={customer} />
+                      <ResetPassword selectedData={customer} />
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* PAGINATION */}
+      <div className="mt-8 flex justify-center">
+        <div className="bg-white/70 backdrop-blur-xl border border-white/40 shadow-lg rounded-xl px-6 py-4">
+          <Pagination count={counts} currentPage={page} perPage={quantity} />
+        </div>
       </div>
     </div>
-  )
+  );
 }

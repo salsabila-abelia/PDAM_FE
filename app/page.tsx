@@ -1,65 +1,133 @@
-import Image from "next/image";
+import Link from "next/link";
 
-export default function Home() {
+export default function HomePage() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <div className="min-h-screen bg-gradient-to-br from-pink-100 via-purple-100 to-blue-100">
+      {/* NAVBAR */}
+      <nav className="flex items-center justify-between px-6 py-5 md:px-10">
+        <h1 className="text-xl md:text-2xl font-bold bg-gradient-to-r from-pink-500 via-purple-500 to-blue-500 text-transparent bg-clip-text">
+          PDAM APP
+        </h1>
+
+        <Link
+          href="/sign-in"
+          className="rounded-xl bg-gradient-to-r from-pink-500 via-purple-500 to-blue-500 px-5 py-2.5 text-sm md:text-base font-semibold text-white shadow-lg shadow-purple-200 transition hover:scale-105"
+        >
+          Sign In
+        </Link>
+      </nav>
+
+      {/* HERO */}
+      <section className="px-6 py-16 md:px-10 md:py-24">
+        <div className="mx-auto grid max-w-6xl items-center gap-10 lg:grid-cols-2">
+          {/* LEFT */}
+          <div>
+            <p className="mb-4 inline-block rounded-full bg-white/60 px-4 py-2 text-sm font-medium text-purple-700 backdrop-blur-md border border-white/40">
+              Smart Water Service Dashboard
+            </p>
+
+            <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight bg-gradient-to-r from-pink-500 via-purple-500 to-blue-500 text-transparent bg-clip-text">
+              Water Service Management System
+            </h2>
+
+            <p className="mt-6 max-w-xl text-gray-600 text-base md:text-lg">
+              Sistem manajemen pelanggan, layanan, dan administrator dengan
+              tampilan modern, rapi, dan mudah digunakan.
+            </p>
+
+            <div className="mt-10 flex flex-wrap gap-4">
+              <Link
+                href="/sign-in"
+                className="rounded-xl bg-gradient-to-r from-pink-500 via-purple-500 to-blue-500 px-6 py-3 font-semibold text-white shadow-lg shadow-purple-200 transition hover:scale-105"
+              >
+                Login Dashboard
+              </Link>
+
+              <Link
+                href="/sign-in"
+                className="rounded-xl border border-white/40 bg-white/70 px-6 py-3 font-semibold text-gray-700 backdrop-blur-md transition hover:bg-white/90"
+              >
+                Get Started
+              </Link> 
+            </div>
+          </div>
+
+          {/* RIGHT */}
+          <div className="relative">
+            <div className="absolute -inset-2 rounded-3xl bg-gradient-to-r from-pink-400 via-purple-400 to-blue-400 blur-2xl opacity-30"></div>
+
+            <div className="relative rounded-3xl border border-white/40 bg-white/70 p-6 shadow-2xl backdrop-blur-xl">
+              <div className="mb-5 flex items-center gap-2">
+                <div className="h-3 w-3 rounded-full bg-pink-400"></div>
+                <div className="h-3 w-3 rounded-full bg-purple-400"></div>
+                <div className="h-3 w-3 rounded-full bg-blue-400"></div>
+              </div>
+
+              <div className="grid gap-4">
+                <div className="rounded-2xl border border-white/40 bg-white/80 p-5 shadow-sm">
+                  <h3 className="text-lg font-semibold text-gray-800">
+                    Customer Management
+                  </h3>
+                  <p className="mt-2 text-sm text-gray-600">
+                    Kelola data pelanggan dengan tampilan yang lebih rapi dan
+                    terstruktur.
+                  </p>
+                </div>
+
+                <div className="rounded-2xl border border-white/40 bg-white/80 p-5 shadow-sm">
+                  <h3 className="text-lg font-semibold text-gray-800">
+                    Service Packages
+                  </h3>
+                  <p className="mt-2 text-sm text-gray-600">
+                    Atur paket layanan air berdasarkan pemakaian dengan mudah.
+                  </p>
+                </div>
+
+                <div className="rounded-2xl border border-white/40 bg-white/80 p-5 shadow-sm">
+                  <h3 className="text-lg font-semibold text-gray-800">
+                    Admin Dashboard
+                  </h3>
+                  <p className="mt-2 text-sm text-gray-600">
+                    Kontrol penuh untuk administrator dalam mengelola sistem.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+      </section>
+
+      {/* FEATURE CARDS */}
+      <section className="px-6 pb-16 md:px-10 md:pb-24">
+        <div className="mx-auto grid max-w-6xl gap-6 md:grid-cols-3">
+          <div className="rounded-2xl border border-white/40 bg-white/70 p-6 shadow-xl backdrop-blur-lg">
+            <h3 className="text-lg font-semibold text-gray-800">
+              Modern Interface
+            </h3>
+            <p className="mt-2 text-sm text-gray-600">
+              Desain clean dengan nuansa gradient pink, ungu, dan biru.
+            </p>
+          </div>
+
+          <div className="rounded-2xl border border-white/40 bg-white/70 p-6 shadow-xl backdrop-blur-lg">
+            <h3 className="text-lg font-semibold text-gray-800">
+              Responsive Layout
+            </h3>
+            <p className="mt-2 text-sm text-gray-600">
+              Tampilan tetap nyaman digunakan di desktop maupun mobile.
+            </p>
+          </div>
+
+          <div className="rounded-2xl border border-white/40 bg-white/70 p-6 shadow-xl backdrop-blur-lg">
+            <h3 className="text-lg font-semibold text-gray-800">
+              Easy Navigation
+            </h3>
+            <p className="mt-2 text-sm text-gray-600">
+              Dari halaman awal langsung terhubung ke halaman sign-in.
+            </p>
+          </div>
         </div>
-      </main>
+      </section>
     </div>
   );
 }
